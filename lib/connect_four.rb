@@ -38,14 +38,36 @@ class Game
   def play
     piece = @use_x ? 'X' : 'Y'
     col = get_column
+    return false if col.nil?
     insert_piece(col, piece)
     @use_x = @use_x ? false : true
+    return true if column_win?(col, piece)
+    false
+  end
+
+  def column_win?(col, piece)
+    row = 5
+    while row >= 0 do
+      return true if square_contain_win?(row, col, piece)
+      row -= 1
+    end
+    false
+  end
+
+  def play_game
+    keep_playing = true
+    while keep_playing do
+      keep_playing = !play
+      print_board 
+    end
   end
 
   private
 
   def row_length(arr, piece)
-    arr.filter { |pos| @board[pos[0]][pos[1]] == piece }.length
+    arr
+      .filter { |pos| pos[0] <= 5 && pos[1] <= 6}
+      .filter { |pos| @board[pos[0]][pos[1]] == piece }.length
   end
 
   def declare_mask(row, col)
@@ -61,10 +83,22 @@ class Game
     number = gets.chomp
     number.numeric? ? number.to_i : nil
   end
+
+  def print_board
+    @board.each do |arr|
+      arr.each { |cell| print "#{cell} "}
+      puts
+    end
+  end
 end
 
 class String
   def numeric?
-    Float(self) != nil rescue false
+    !Float(self).nil?
+  rescue StandardError
+    false
   end
 end
+
+game = Game.new
+game.play_game
